@@ -11,7 +11,7 @@ Since Structure of language is having significance. LSTM, will take care of sequ
 - `Platform`  :: python
 - `Framework` :: keras
 - `Technique` :: one hot encoding. Vocabulary is defined and each word is allocated to unique id. Review is devided in words and each word is converted to number ( id of word in dictionary of Vocabulary).
-- `Algorithm` :: LSTM With 1 layer 100 units. 
+- `Algorithm` :: LSTM With 1 layer 300 units. 
 
 ### Data
 
@@ -23,31 +23,13 @@ Since Structure of language is having significance. LSTM, will take care of sequ
 
 ### Files
 
-- `SentimentAnalysisIMDB.py` :: Coding file for step by step process with details. 
-- `finalized_model.sav` :: Saved model on local directory
-- `finalized_model_cv.sav` :: Saved Count Vectorized representation of reviews.
-
+- `SentimentAnalysisLSTM.py` :: Coding file for step by step process with details. 
 
 ### Conclusion
 
 Model is train and tested with efficiency of 88% on test data.
 
-### Top 5: Positive Word
 
-('excellent', 1.365964583386036)
-('refreshing', 1.2609655289082766)
-('perfect', 1.2064915697312957)
-('superb', 1.1376531892553046)
-('appreciated', 1.1225944226055673)
-
-
-### Top 5: Negetive Word
-
-('worst', -2.0770743501386253)
-('waste', -1.9167593125702842)
-('disappointment', -1.6835827461330934)
-('poorly', -1.6612995664050252)
-('awful', -1.543518327212851)
 
 
 

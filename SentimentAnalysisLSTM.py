@@ -15,10 +15,11 @@ Data Souce: Movie review data from imdb. Data set already available in the keras
 
 """
 
-from keras import Sequential
+from keras import Sequential,optimizers
 from keras.datasets import imdb
 from keras.preprocessing import sequence
-from keras.layers import Embedding,LSTM,Dropout,Dense
+from keras.layers import Embedding,LSTM,Dropout,Dense,SpatialDropout1D
+from keras.models import model_from_json
 import numpy as np
 
 
@@ -53,12 +54,13 @@ def design_rnn_model (data,embedding_size,vocabulary_size,maxlen):
     
     model = Sequential()
     model.add(Embedding(vocabulary_size,embedding_size,input_length=maxlen))
-    model.add(LSTM(300)) #-- First Hidden Layer
+    model.add(LSTM(300, dropout=0.2)) #-- First Hidden Layer
 #    model.add(Dropout(0.2)) #-- Drop out to make sure model will not overfit data.
 #    model.add(LSTM(100)) #-- Second Hidden Layer
 #    model.add(Dropout(0.2))
     model.add(Dense(units=1,activation='sigmoid'))
-    model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['accuracy'])
+    #adam = optimizers.Adam(lr = 0.001)
+    model.compile(optimizer='adam', loss='binary_crossentropy',metrics=['accuracy'])
     print(model.summary())
     return model
 
@@ -68,14 +70,32 @@ def build_validation_train_dataset(x_train,y_train,batch_size):
     y_val = y_train [:batch_size]
     x_train2 = x_train [batch_size:]
     y_train2 = y_train [batch_size:]
-    
     return x_val,y_val,x_train2,y_train2
-        
 
+def save_or_load_model (model,action):
+    if action == 'S':
+        #-- Serialize model to json 
+        print('Saving Model on Local Directory =========>>')
+        model_json = model.to_json()
+        with open('E:\\Arif\\Work\\Data Science Course\\DataScienceProjects\\SentimentAnalysisNLP\\lstmmodel.json','w') as json_file:
+            json_file.write(model_json)
+        #-- Serialize weight to HDF5
+        model.save_weights('E:\\Arif\\Work\\Data Science Course\\DataScienceProjects\\SentimentAnalysisNLP\\lstmmodel_weight.h5',overwrite=True)
+        return False
+    elif action == 'L':
+        #-- Load model from json file
+        json_file = open ('E:\\Arif\\Work\\Data Science Course\\DataScienceProjects\\SentimentAnalysisNLP\\lstmmodel.json','r')
+        json_file = json_file.read()
+        loaded_model = model_from_json(json_file)
+        
+        
+        #-- Model is loaded. Now we will laod weight in the model.
+        loaded_model.load_weights('E:\\Arif\\Work\\Data Science Course\\DataScienceProjects\\SentimentAnalysisNLP\\lstmmodel_weight.h5')
+        return loaded_model
+        
 if __name__ ==  "__main__":
     
-#    is_train = input('Do you want to train on new data? Press [y|Y] or [n|N]\n')
-    is_train='y'
+    is_train = input('Do you want to train on new data? Press [y|Y] or [n|N]\n')
     vocabulary_size= 5000
     maxlen= 500
     embedding_size = 32
@@ -116,9 +136,20 @@ if __name__ ==  "__main__":
         
         print('\nModel accuracy on test data is: {}'.format(score))
         
+        #-- Save model. 
+        _= save_or_load_model(model,'S')
         
     elif is_train== 'N' or is_train == 'n':
-        print('\n')
+        #-- Load data from imdb for Prediction
+        print("Predict using saved mode========>>")
+        _,_,x_test,y_test = load_data(vocabulary_size=vocabulary_size)
+        x_test = padding_words(x_test,maxlen)
+        #-- Load already saved model and predict on test data. 
+        model = save_or_load_model(_,'L')
+        model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
+        score = model.evaluate(x_test,y_test,verbose=0)
+        print('\nModel accuracy on test data is: {}'.format(score))
+        
     
 
 
